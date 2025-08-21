@@ -5,25 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WAQIT Game Portal</title>
   <style>
-    body { margin:0; font-family: 'Orbitron', sans-serif; background:#0d1226; color:#fff; text-align:center;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
-    .logo { width:140px; margin-bottom:20px; }
-    button { background:#6c63ff; border:none; padding:12px 24px; border-radius:8px;
-      font-size:18px; color:#fff; cursor:pointer; transition:0.2s; }
+    body {
+      margin:0; font-family: 'Orbitron', sans-serif;
+      background:#0d1226; color:#fff; text-align:center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      height:100vh;
+    }
+    .logo { width:120px; margin-bottom:20px; }
+    button {
+      background:#6c63ff; border:none; padding:12px 24px; border-radius:8px;
+      font-size:18px; color:#fff; cursor:pointer; transition:0.2s;
+    }
     button:hover { background:#5148d4; }
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); align-items:center; justify-content:center; }
-    .modal-content { background:#1a1f3c; padding:30px; border-radius:12px; text-align:center; width:300px; }
-    .login-option { display:flex; align-items:center; justify-content:center; gap:10px;
-      background:#2b335c; margin:10px 0; padding:12px; border-radius:8px; cursor:pointer; transition:0.2s; }
+    .modal {
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); align-items:center; justify-content:center;
+    }
+    .modal-content {
+      background:#1a1f3c; padding:30px; border-radius:12px; text-align:center;
+      width:300px;
+    }
+    .login-option {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      background:#2b335c; margin:10px 0; padding:12px; border-radius:8px; cursor:pointer;
+      transition:0.2s;
+    }
     .login-option:hover { background:#3d4570; }
-    .login-option img { width:24px; height:24px; }
   </style>
 </head>
 <body>
   <img src="logo.png" alt="WAQIT Logo" class="logo" />
-  <h1 id="title">🚀 WAQIT Game Portal</h1>
-  <p id="subtitle">Login untuk mulai bermain Snake & klaim token</p>
+  <h1>🚀 WAQIT Game Portal</h1>
+  <p>Login untuk mulai bermain Snake & klaim token</p>
 
   <!-- Tombol utama -->
   <button id="btnMain">🔑 Login</button>
@@ -31,22 +44,15 @@
   <!-- Modal -->
   <div class="modal" id="loginModal">
     <div class="modal-content">
-      <h2 id="chooseLogin">Pilih Login</h2>
-      <div class="login-option" id="optWallet">
-        <img src="walletconnect.png" alt="WalletConnect" /> <span id="txtWallet">WalletConnect</span>
-      </div>
-      <div class="login-option" id="optFarcaster">
-        <img src="farcaster.png" alt="Farcaster" /> <span id="txtFarcaster">Farcaster</span>
-      </div>
-      <button onclick="closeModal()" id="btnCancel">Batal</button>
+      <h2>Pilih Login</h2>
+      <div class="login-option" id="optWallet">WalletConnect</div>
+      <div class="login-option" id="optFarcaster">Farcaster</div>
+      <button onclick="closeModal()">Batal</button>
     </div>
   </div>
 
-  <script type="module">
-    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from "./config.js";
-    import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
-    import { base } from "https://unpkg.com/viem/chains@2?module";
-
+  <!-- SCRIPT DITARUH DI PALING BAWAH -->
+  <script>
     const btnMain = document.getElementById("btnMain");
     const modal = document.getElementById("loginModal");
     const optWallet = document.getElementById("optWallet");
@@ -54,104 +60,35 @@
 
     let loggedIn = false;
 
-    // === MULTI LANGUAGE ===
-    const lang = navigator.language.startsWith("id") ? "id" : "en";
-    const i18n = {
-      id: {
-        title: "🚀 WAQIT Portal Game",
-        subtitle: "Login untuk mulai bermain Snake & klaim token",
-        login: "🔑 Login",
-        play: "🎮 Main Game",
-        choose: "Pilih Login",
-        wallet: "WalletConnect",
-        farcaster: "Farcaster",
-        cancel: "Batal"
-      },
-      en: {
-        title: "🚀 WAQIT Game Portal",
-        subtitle: "Login to start playing Snake & claim tokens",
-        login: "🔑 Login",
-        play: "🎮 Play Game",
-        choose: "Choose Login",
-        wallet: "WalletConnect",
-        farcaster: "Farcaster",
-        cancel: "Cancel"
-      }
-    };
-
-    function setLang(l) {
-      document.getElementById("title").textContent = i18n[l].title;
-      document.getElementById("subtitle").textContent = i18n[l].subtitle;
-      btnMain.textContent = i18n[l].login;
-      document.getElementById("chooseLogin").textContent = i18n[l].choose;
-      document.getElementById("txtWallet").textContent = i18n[l].wallet;
-      document.getElementById("txtFarcaster").textContent = i18n[l].farcaster;
-      document.getElementById("btnCancel").textContent = i18n[l].cancel;
-    }
-    setLang(lang);
-
-    // === WALLETCONNECT SETUP ===
-    const wagmiConfig = defaultWagmiConfig({
-      chains: [base],
-      projectId: WALLETCONNECT_PROJECT_ID,
-      metadata: {
-        name: "WAQIT Game Portal",
-        description: "Portal Game Futuristik",
-        url: location.origin,
-        icons: ["/logo.png"]
-      }
-    });
-    const modalWC = createWeb3Modal({
-      wagmiConfig,
-      projectId: WALLETCONNECT_PROJECT_ID,
-      chains: [base]
-    });
-
-    // === LOGIN HANDLER ===
-    async function loginWallet() {
-      try {
-        await modalWC.open();
-        return true;
-      } catch (e) {
-        console.error("Wallet connect gagal:", e);
-        return false;
-      }
-    }
-
-    async function loginFarcaster() {
-      try {
-        const res = await fetch("https://api.neynar.com/v2/farcaster/user", {
-          headers: { "api_key": NEYNAR_API_KEY }
-        });
-        if (res.ok) return true;
-      } catch (err) {
-        console.error("Farcaster login error:", err);
-      }
-      return false;
-    }
-
+    // Klik tombol utama
     btnMain.addEventListener("click", () => {
       if (!loggedIn) {
         modal.style.display = "flex";
       } else {
-        window.location.href = "/games/snake/index.html";
+        window.location.href = "/games/snake/index.html"; // redirect ke game
       }
     });
 
-    optWallet.onclick = async () => {
-      const ok = await loginWallet();
-      if (ok) afterLogin();
-    };
-    optFarcaster.onclick = async () => {
-      const ok = await loginFarcaster();
-      if (ok) afterLogin();
-    };
+    // Klik login via wallet
+    optWallet.addEventListener("click", () => {
+      console.log("WalletConnect dipilih");
+      afterLogin("Wallet");
+    });
 
-    function afterLogin() {
+    // Klik login via farcaster
+    optFarcaster.addEventListener("click", () => {
+      console.log("Farcaster dipilih");
+      afterLogin("Farcaster");
+    });
+
+    function afterLogin(method) {
       loggedIn = true;
-      btnMain.textContent = i18n[lang].play;
+      btnMain.textContent = "🎮 Main Game";
       modal.style.display = "none";
+      alert("Login sukses via " + method);
     }
+
+    // Tutup modal
     window.closeModal = () => modal.style.display = "none";
   </script>
 </body>
