@@ -1,50 +1,50 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WAQIT Game Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WAQIT GAME PORTAL</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Background Musik -->
-  <audio id="bg-music" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- Portal Hero -->
-  <section class="hero">
-    <img src="logo.png" alt="WAQIT Logo" class="logo" />
+  <!-- HEADER -->
+  <header class="topbar">
+    <img src="logo.png" alt="WAQIT GAME PORTAL" class="logo">
     <h1>WAQIT GAME PORTAL</h1>
-    <p>Play. Earn. Connect. 🚀</p>
+    <audio id="bgm" autoplay loop>
+      <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+    <button id="muteBtn">🔊</button>
     <w3m-button></w3m-button>
-    <button id="startGame">🎮 Main Sekarang</button>
-  </section>
+  </header>
 
-  <!-- Game Area -->
-  <section id="gameArea" style="display:none;">
-    <header class="topbar">
-      <div class="title">🐍 Snake</div>
-      <button id="claimBtn" class="btn" disabled>Klaim Reward</button>
-    </header>
-    <canvas id="canvas" width="400" height="400"></canvas>
-    <p class="hint">Kontrol: swipe atau tombol panah</p>
-    <div>Skor: <span id="score">0</span></div>
-  </section>
+  <!-- MAIN -->
+  <main class="center">
+    <h2>Portal Game Futuristik</h2>
+    <p>Login dulu dengan Wallet + Farcaster untuk mulai main.</p>
 
-  <!-- Script Web3 -->
+    <button id="loginFarcaster" class="btn">🔑 Login Farcaster</button>
+
+    <button id="playBtn" class="btn" style="display:none;"
+      onclick="window.location.href='/games/snake/index.html'">
+      🎮 Main Game
+    </button>
+  </main>
+
+  <!-- SCRIPT -->
   <script type="module">
-    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
-    import { base } from 'https://unpkg.com/viem/chains@2?module';
-    import { WALLETCONNECT_PROJECT_ID } from './config.js';
+    import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
+    import { base } from "https://unpkg.com/viem/chains@2?module";
+    import NeynarClient from "https://cdn.jsdelivr.net/npm/@neynar/nodejs-sdk@latest/+esm";
+    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from "./config.js";
 
+    // ==== Wallet ====
     const metadata = {
-      name: 'WAQIT Game Portal',
-      description: 'Play to Earn di jaringan Base',
+      name: "WAQIT GAME PORTAL",
+      description: "Play Web3 games with rewards",
       url: location.origin,
-      icons: ['logo.png']
+      icons: ["logo.png"]
     };
-
     const wagmiConfig = defaultWagmiConfig({
       chains: [base],
       projectId: WALLETCONNECT_PROJECT_ID,
@@ -54,27 +54,49 @@
       enableWalletConnect: true,
       enableEIP6963: true
     });
+    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base] });
 
-    createWeb3Modal({
-      wagmiConfig,
-      projectId: WALLETCONNECT_PROJECT_ID,
-      chains: [base],
-      defaultChain: base
+    let walletConnected = false;
+    window.ethereum?.on("accountsChanged", accs => {
+      walletConnected = accs && accs.length > 0;
+      checkReady();
     });
 
-    // tombol game
-    document.getElementById("startGame").addEventListener("click", () => {
-      document.querySelector(".hero").style.display = "none";
-      document.getElementById("gameArea").style.display = "block";
+    // ==== Farcaster ====
+    const client = new NeynarClient(NEYNAR_API_KEY);
+    let farcasterLoggedIn = false;
+
+    document.getElementById("loginFarcaster").addEventListener("click", async () => {
+      try {
+        const resp = await client.oauth.authorize({
+          redirectUri: window.location.origin,
+          scope: "openid f_name f_id"
+        });
+        if (resp?.user) {
+          alert(`Login Farcaster sukses: ${resp.user.username}`);
+          farcasterLoggedIn = true;
+          checkReady();
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Login Farcaster gagal.");
+      }
+    });
+
+    // ==== Show play if both ok ====
+    function checkReady() {
+      if (walletConnected && farcasterLoggedIn) {
+        document.getElementById("playBtn").style.display = "inline-block";
+      }
+    }
+
+    // ==== Music mute/unmute ====
+    const bgm = document.getElementById("bgm");
+    const muteBtn = document.getElementById("muteBtn");
+    muteBtn.addEventListener("click", () => {
+      bgm.muted = !bgm.muted;
+      muteBtn.textContent = bgm.muted ? "🔇" : "🔊";
     });
   </script>
-
-  <!-- Script Game Snake -->
-  <script type="module" src="./games/snake/snake.js"></script>
 </body>
-  <script>
-  document.getElementById("startGame").addEventListener("click", () => {
-    window.location.href = "./games/snake/index.html";
-  });
-
 </html>
