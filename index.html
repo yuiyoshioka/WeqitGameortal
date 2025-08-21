@@ -1,39 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WAQIT GAME PORTAL</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WAQIT Game Portal</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Background Music -->
+  <!-- Background Musik -->
   <audio id="bg-music" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg">
+    <source src="music.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- Hero Section -->
-  <div class="hero">
-    <img src="logo.png" alt="WAQIT Logo" class="logo">
+  <!-- Portal Hero -->
+  <section class="hero">
+    <img src="logo.png" alt="WAQIT Logo" class="logo" />
     <h1>WAQIT GAME PORTAL</h1>
-    <p>Play to Earn • Blockchain Gaming</p>
-
-    <!-- Wallet Connect -->
+    <p>Play. Earn. Connect. 🚀</p>
     <w3m-button></w3m-button>
+    <button id="startGame">🎮 Main Sekarang</button>
+  </section>
 
-    <!-- Button to Games -->
-    <a href="games/snake/index.html" class="btn">🎮 Mulai Main</a>
-  </div>
+  <!-- Game Area -->
+  <section id="gameArea" style="display:none;">
+    <header class="topbar">
+      <div class="title">🐍 Snake</div>
+      <button id="claimBtn" class="btn" disabled>Klaim Reward</button>
+    </header>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <p class="hint">Kontrol: swipe atau tombol panah</p>
+    <div>Skor: <span id="score">0</span></div>
+  </section>
 
-  <!-- Web3Modal WalletConnect -->
+  <!-- Script Web3 -->
   <script type="module">
     import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
     import { base } from 'https://unpkg.com/viem/chains@2?module';
     import { WALLETCONNECT_PROJECT_ID } from './config.js';
 
     const metadata = {
-      name: 'WAQIT GAME PORTAL',
-      description: 'Portal Play to Earn Blockchain Gaming',
+      name: 'WAQIT Game Portal',
+      description: 'Play to Earn di jaringan Base',
       url: location.origin,
       icons: ['logo.png']
     };
@@ -54,6 +61,15 @@
       chains: [base],
       defaultChain: base
     });
+
+    // tombol game
+    document.getElementById("startGame").addEventListener("click", () => {
+      document.querySelector(".hero").style.display = "none";
+      document.getElementById("gameArea").style.display = "block";
+    });
   </script>
+
+  <!-- Script Game Snake -->
+  <script type="module" src="./games/snake/snake.js"></script>
 </body>
 </html>
