@@ -4,33 +4,43 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WAQIT Game Portal</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body { margin:0; font-family:sans-serif; background:#0d1226; color:#fff; text-align:center;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; }
+    body {
+      margin:0; font-family: 'Orbitron', sans-serif;
+      background:#0d1226; color:#fff; text-align:center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;
+    }
     .logo { width:140px; margin-bottom:20px; }
     button {
       background:#6c63ff; border:none; padding:12px 24px; border-radius:8px;
       font-size:18px; color:#fff; cursor:pointer; transition:0.2s;
     }
     button:hover { background:#5148d4; }
-    .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); align-items:center; justify-content:center; }
-    .modal-content { background:#1a1f3c; padding:30px; border-radius:12px; text-align:center; width:300px; }
-    .login-option { display:flex; align-items:center; justify-content:center; gap:10px;
-      background:#2b335c; margin:10px 0; padding:12px; border-radius:8px; cursor:pointer; }
+    .modal {
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); align-items:center; justify-content:center;
+    }
+    .modal-content {
+      background:#1a1f3c; padding:30px; border-radius:12px; text-align:center;
+      width:300px;
+    }
+    .login-option {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      background:#2b335c; margin:10px 0; padding:12px; border-radius:8px; cursor:pointer;
+      transition:0.2s;
+    }
     .login-option:hover { background:#3d4570; }
     .login-option img { width:24px; height:24px; }
   </style>
 </head>
 <body>
-  <img src="logo.png" class="logo" />
+  <img src="logo.png" alt="WAQIT Logo" class="logo" />
   <h1>🚀 WAQIT Game Portal</h1>
   <p>Login untuk mulai bermain Snake & klaim token</p>
 
-  <!-- Tombol utama -->
   <button id="btnMain">🔑 Login</button>
 
-  <!-- Modal -->
   <div class="modal" id="loginModal">
     <div class="modal-content">
       <h2>Pilih Login</h2>
@@ -44,7 +54,7 @@
     </div>
   </div>
 
-  <!-- === SCRIPT ASLI (bukan dummy) === -->
+  <!-- Script ada di paling bawah biar tombol udah render -->
   <script type="module">
     import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
     import { base } from "https://unpkg.com/viem/chains@2?module";
@@ -59,7 +69,7 @@
 
     let loggedIn = false;
 
-    // === Setup WalletConnect ===
+    // Setup WalletConnect
     const wagmiConfig = defaultWagmiConfig({
       chains: [base],
       projectId: WALLETCONNECT_PROJECT_ID,
@@ -70,7 +80,6 @@
         icons: ["/logo.png"]
       }
     });
-
     const web3modal = createWeb3Modal({
       wagmiConfig,
       projectId: WALLETCONNECT_PROJECT_ID,
@@ -89,7 +98,7 @@
     // Klik WalletConnect
     optWallet.addEventListener("click", async () => {
       try {
-        await web3modal.open(); // 🔥 ini manggil modal asli
+        await web3modal.open();
         afterLogin("WalletConnect");
       } catch (err) {
         alert("WalletConnect gagal");
