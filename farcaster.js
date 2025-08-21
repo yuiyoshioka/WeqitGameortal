@@ -1,49 +1,30 @@
-// pastikan di index.html sudah ada:
-// <script src="https://cdn.jsdelivr.net/npm/@farcaster/auth-kit"></script>
-// <script type="module" src="./farcaster.js"></script>
+import { AuthKit, FrameValidation } from "https://cdn.jsdelivr.net/npm/@farcaster/auth-kit/dist/browser/index.min.js";
 
-let farcasterClient = null;
+// init Farcaster AuthKit
+const authKit = new AuthKit({
+  rpcUrl: "https://hub.farcaster.xyz:2281", // public hub RPC
+  relay: "https://relay.farcaster.xyz",    // relay official Farcaster
+  appName: "WAQIT GAME PORTAL"
+});
 
-async function initFarcaster() {
+// ambil tombol dan div user
+const userBox = document.getElementById("farcasterUser");
+
+// fungsi untuk login
+window.loginFarcaster = async () => {
   try {
-    // bikin instance client
-    farcasterClient = new window.AuthKit({
-      rpcUrl: "https://hub.farcaster.xyz", // hub resmi Farcaster
-    });
-  } catch (err) {
-    console.error("Gagal init Farcaster:", err);
-  }
-}
+    const res = await authKit.signIn();
+    console.log("Farcaster login success:", res);
 
-// fungsi login Farcaster
-export async function loginFarcaster() {
-  try {
-    if (!farcasterClient) await initFarcaster();
-
-    const session = await farcasterClient.signIn();
-
-    const user = {
-      fid: session.fid,
-      username: session.username,
-      avatar: session.pfpUrl,
-      custody: session.custodyAddress,
-    };
-
-    console.log("✅ Farcaster login sukses:", user);
-
-    // update UI
-    const container = document.getElementById("farcasterUser");
-    if (container) {
-      container.innerHTML = `
-        <img src="${user.avatar}" width="30" style="border-radius:50%"/> 
-        <b>@${user.username}</b>
+    if (res && res.fid) {
+      userBox.innerHTML = `
+        <div class="farc-user">
+          ✅ Logged in as <b>@${res.username || res.fid}</b>
+        </div>
       `;
     }
-
-    return user;
   } catch (err) {
-    console.error("❌ Login Farcaster gagal:", err);
-    alert("Login Farcaster gagal");
-    return null;
+    console.error("Farcaster login error:", err);
+    alert("Login Farcaster gagal, coba lagi.");
   }
-}
+};
