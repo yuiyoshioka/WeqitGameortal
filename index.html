@@ -4,19 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WAQIT GAME PORTAL</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #0f0f1f, #000);
+      color: #0ff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .logo {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #0ff;
+      border: none;
+      padding: 12px 24px;
+      margin: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <img src="logo.png" alt="WAQIT Logo" class="logo" />
-    <h1>WAQIT GAME PORTAL</h1>
-    <p>Play. Earn. Connect. 🚀</p>
+  <img src="logo.png" alt="WAQIT Logo" class="logo" />
+  <h1>WAQIT GAME PORTAL</h1>
+  <p>Play. Earn. Connect. 🚀</p>
 
-    <button id="btnWallet">🔗 Connect Wallet</button>
-    <button id="btnFarcaster">💬 Login Farcaster</button>
-    <button id="btnPlay" disabled>🎮 Main Sekarang</button>
-  </div>
+  <button id="btnWallet">🔗 Connect Wallet</button>
+  <button id="btnFarcaster">💬 Login Farcaster</button>
+  <button id="btnPlay" disabled>🎮 Main Sekarang</button>
 
-  <script type="module" src="./script.js"></script>
+  <script>
+    // sementara dummy biar gak error
+    document.getElementById("btnWallet").onclick = () => alert("Wallet clicked!");
+    document.getElementById("btnFarcaster").onclick = () => alert("Farcaster clicked!");
+    document.getElementById("btnPlay").onclick = () => location.href = "/games/snake/index.html";
+  </script>
 </body>
 </html>
