@@ -1,95 +1,79 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WAQIT Game Portal</title>
-  <style>
-    body {
-      margin:0; font-family: 'Orbitron', sans-serif;
-      background:#0d1226; color:#fff; text-align:center;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      height:100vh;
-    }
-    .logo { width:120px; margin-bottom:20px; }
-    button {
-      background:#6c63ff; border:none; padding:12px 24px; border-radius:8px;
-      font-size:18px; color:#fff; cursor:pointer; transition:0.2s;
-    }
-    button:hover { background:#5148d4; }
-    .modal {
-      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); align-items:center; justify-content:center;
-    }
-    .modal-content {
-      background:#1a1f3c; padding:30px; border-radius:12px; text-align:center;
-      width:300px;
-    }
-    .login-option {
-      display:flex; align-items:center; justify-content:center; gap:10px;
-      background:#2b335c; margin:10px 0; padding:12px; border-radius:8px; cursor:pointer;
-      transition:0.2s;
-    }
-    .login-option:hover { background:#3d4570; }
-  </style>
-</head>
-<body>
-  <img src="logo.png" alt="WAQIT Logo" class="logo" />
-  <h1>🚀 WAQIT Game Portal</h1>
-  <p>Login untuk mulai bermain Snake & klaim token</p>
+<script type="module">
+  import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
+  import { base } from "https://unpkg.com/viem/chains@2?module";
 
-  <!-- Tombol utama -->
-  <button id="btnMain">🔑 Login</button>
+  const WALLETCONNECT_PROJECT_ID = "48b334d8de52dbd9b8961aa95b361027";
+  const NEYNAR_API_KEY = "3F17B1A2-18B4-4EB9-8F64-301575EF94D0";
 
-  <!-- Modal -->
-  <div class="modal" id="loginModal">
-    <div class="modal-content">
-      <h2>Pilih Login</h2>
-      <div class="login-option" id="optWallet">WalletConnect</div>
-      <div class="login-option" id="optFarcaster">Farcaster</div>
-      <button onclick="closeModal()">Batal</button>
-    </div>
-  </div>
+  const btnMain = document.getElementById("btnMain");
+  const modal = document.getElementById("loginModal");
+  const optWallet = document.getElementById("optWallet");
+  const optFarcaster = document.getElementById("optFarcaster");
 
-  <!-- SCRIPT DITARUH DI PALING BAWAH -->
-  <script>
-    const btnMain = document.getElementById("btnMain");
-    const modal = document.getElementById("loginModal");
-    const optWallet = document.getElementById("optWallet");
-    const optFarcaster = document.getElementById("optFarcaster");
+  let loggedIn = false;
 
-    let loggedIn = false;
+  // === Setup WalletConnect ===
+  const wagmiConfig = defaultWagmiConfig({
+    chains: [base],
+    projectId: WALLETCONNECT_PROJECT_ID,
+    metadata: {
+      name: "WAQIT Game Portal",
+      description: "Portal Game Futuristik",
+      url: location.origin,
+      icons: ["/logo.png"]
+    }
+  });
 
-    // Klik tombol utama
-    btnMain.addEventListener("click", () => {
-      if (!loggedIn) {
-        modal.style.display = "flex";
+  createWeb3Modal({
+    wagmiConfig,
+    projectId: WALLETCONNECT_PROJECT_ID,
+    chains: [base]
+  });
+
+  // Klik tombol utama
+  btnMain.addEventListener("click", () => {
+    if (!loggedIn) {
+      modal.style.display = "flex";
+    } else {
+      window.location.href = "/games/snake/index.html";
+    }
+  });
+
+  // Klik WalletConnect
+  optWallet.addEventListener("click", async () => {
+    try {
+      // ini bakal munculin modal walletconnect
+      window.open("https://explorer.walletconnect.com/?projectId=" + WALLETCONNECT_PROJECT_ID, "_blank");
+      afterLogin("WalletConnect");
+    } catch (err) {
+      alert("WalletConnect gagal");
+      console.error(err);
+    }
+  });
+
+  // Klik Farcaster
+  optFarcaster.addEventListener("click", async () => {
+    try {
+      const res = await fetch("https://api.neynar.com/v2/farcaster/user", {
+        headers: { "api_key": NEYNAR_API_KEY }
+      });
+      if (res.ok) {
+        afterLogin("Farcaster");
       } else {
-        window.location.href = "/games/snake/index.html"; // redirect ke game
+        alert("Login Farcaster gagal");
       }
-    });
-
-    // Klik login via wallet
-    optWallet.addEventListener("click", () => {
-      console.log("WalletConnect dipilih");
-      afterLogin("Wallet");
-    });
-
-    // Klik login via farcaster
-    optFarcaster.addEventListener("click", () => {
-      console.log("Farcaster dipilih");
-      afterLogin("Farcaster");
-    });
-
-    function afterLogin(method) {
-      loggedIn = true;
-      btnMain.textContent = "🎮 Main Game";
-      modal.style.display = "none";
-      alert("Login sukses via " + method);
+    } catch (err) {
+      alert("Error Farcaster");
+      console.error(err);
     }
+  });
 
-    // Tutup modal
-    window.closeModal = () => modal.style.display = "none";
-  </script>
-</body>
-</html>
+  function afterLogin(method) {
+    loggedIn = true;
+    btnMain.textContent = "🎮 Main Game";
+    modal.style.display = "none";
+    console.log("Login sukses via", method);
+  }
+
+  window.closeModal = () => modal.style.display = "none";
+</script>
