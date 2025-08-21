@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snake — PlayBase</title>
+  <link rel="stylesheet" href="snake.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a href="../../index.html" class="back" data-i18n="back">Kembali</a>
+    <div class="title">🐍 Snake</div>
+    <w3m-button balance="hide"></w3m-button>
+  </header>
+
+  <main class="wrap">
+    <div class="hud">
+      <div><span data-i18n="score">Skor</span>: <span id="score">0</span></div>
+      <button id="claimBtn" class="btn" disabled data-i18n="claim">Klaim Reward</button>
+    </div>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <p class="hint" data-i18n="controls_hint">Kontrol: swipe atau tombol panah</p>
+  </main>
+
+  <script type="module">
+    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
+    import { base } from 'https://unpkg.com/viem/chains@2?module';
+    import { initI18n } from '../../i18n.js';
+    import { WALLETCONNECT_PROJECT_ID } from '../../config.js';
+    initI18n(document);
+    const metadata = { name:'PlayBase Snake', description:'Snake with on‑chain rewards', url: location.origin, icons: ['https://avatars.githubusercontent.com/u/37784886?s=200&v=4'] };
+    const wagmiConfig = defaultWagmiConfig({ chains:[base], projectId: WALLETCONNECT_PROJECT_ID, metadata, enableCoinbase:true, enableInjected:true, enableWalletConnect:true, enableEIP6963:true });
+    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base], defaultChain: base });
+  </script>
+  <script type="module" src="snake.js"></script>
+</body>
+</html>
