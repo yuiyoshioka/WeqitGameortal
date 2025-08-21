@@ -45,12 +45,13 @@
     </div>
   </div>
 
-  <!-- ====== CDN scripts ====== -->
-  <script src="https://unpkg.com/@web3modal/wagmi@3/dist/wagmi.js"></script>
-  <script src="https://unpkg.com/@web3modal/html@3/dist/html.js"></script>
-  <script src="https://unpkg.com/viem/dist/viem.js"></script>
+  <!-- Script bener: import module langsung -->
+  <script type="module">
+    import { createWeb3Modal, defaultWagmiConfig } 
+      from "https://unpkg.com/@web3modal/wagmi@3?module";
+    import { base } 
+      from "https://unpkg.com/viem/chains?module";
 
-  <script>
     const WALLETCONNECT_PROJECT_ID = "48b334d8de52dbd9b8961aa95b361027";
     const NEYNAR_API_KEY = "3F17B1A2-18B4-4EB9-8F64-301575EF94D0";
 
@@ -61,12 +62,9 @@
 
     let loggedIn = false;
 
-    // Setup WalletConnect pakai CDN
-    const { defaultWagmiConfig } = window.Wagmi;
-    const { createWeb3Modal } = window.Web3Modal;
-    const { chains } = window.viem;
+    // Setup Web3Modal
     const wagmiConfig = defaultWagmiConfig({
-      chains: [chains.base],
+      chains: [base],
       projectId: WALLETCONNECT_PROJECT_ID,
       metadata: {
         name: "WAQIT Game Portal",
@@ -75,10 +73,11 @@
         icons: ["/logo.png"]
       }
     });
+
     const web3modal = createWeb3Modal({
       wagmiConfig,
       projectId: WALLETCONNECT_PROJECT_ID,
-      chains: [chains.base]
+      chains: [base]
     });
 
     // Klik tombol utama
@@ -93,7 +92,7 @@
     // Klik WalletConnect
     optWallet.addEventListener("click", async () => {
       try {
-        await web3modal.open();
+        await web3modal.open(); // munculin modal walletconnect beneran
         afterLogin("WalletConnect");
       } catch (err) {
         alert("WalletConnect gagal");
@@ -124,6 +123,7 @@
       modal.style.display = "none";
       console.log("Login sukses via", method);
     }
+
     window.closeModal = () => modal.style.display = "none";
   </script>
 </body>
