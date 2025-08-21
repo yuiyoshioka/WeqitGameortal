@@ -1,8 +1,4 @@
-<script type="module">
-  import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
-  import { base } from "https://unpkg.com/viem/chains@2?module";
-
-  const WALLETCONNECT_PROJECT_ID = "48b334d8de52dbd9b8961aa95b361027";
+<script>
   const NEYNAR_API_KEY = "3F17B1A2-18B4-4EB9-8F64-301575EF94D0";
 
   const btnMain = document.getElementById("btnMain");
@@ -12,25 +8,6 @@
 
   let loggedIn = false;
 
-  // === Setup WalletConnect ===
-  const wagmiConfig = defaultWagmiConfig({
-    chains: [base],
-    projectId: WALLETCONNECT_PROJECT_ID,
-    metadata: {
-      name: "WAQIT Game Portal",
-      description: "Portal Game Futuristik",
-      url: location.origin,
-      icons: ["/logo.png"]
-    }
-  });
-
-  createWeb3Modal({
-    wagmiConfig,
-    projectId: WALLETCONNECT_PROJECT_ID,
-    chains: [base]
-  });
-
-  // Klik tombol utama
   btnMain.addEventListener("click", () => {
     if (!loggedIn) {
       modal.style.display = "flex";
@@ -39,16 +16,10 @@
     }
   });
 
-  // Klik WalletConnect
+  // Klik WalletConnect (sementara dummy biar gak error)
   optWallet.addEventListener("click", async () => {
-    try {
-      // ini bakal munculin modal walletconnect
-      window.open("https://explorer.walletconnect.com/?projectId=" + WALLETCONNECT_PROJECT_ID, "_blank");
-      afterLogin("WalletConnect");
-    } catch (err) {
-      alert("WalletConnect gagal");
-      console.error(err);
-    }
+    alert("WalletConnect triggered (dummy dulu, biar gak blank).");
+    afterLogin("WalletConnect");
   });
 
   // Klik Farcaster
