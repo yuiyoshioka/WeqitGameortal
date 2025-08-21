@@ -1,157 +1,42 @@
 <!doctype html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WAQIT GAME PORTAL</title>
-  <meta name="description" content="Mainkan mini-game & klaim reward on-chain di Base." />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>WAQIT Game Portal</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="header">
-    <div class="container nav">
-      <a class="brand" href="#"><span class="logo">◆</span><span>WAQIT GAME PORTAL</span></a>
+  <!-- Background Music -->
+  <audio id="bgm" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg" />
+  </audio>
+  <button id="muteBtn">🔊</button>
 
-      <button class="nav-toggle" aria-expanded="false">☰</button>
-      <nav class="nav-links" id="nav">
-        <a href="#games" data-i18n="nav_games">Games</a>
-        <a href="#how" data-i18n="nav_how">How it Works</a>
-        <a href="#token" data-i18n="nav_token">Token</a>
-        <a href="#roadmap" data-i18n="nav_roadmap">Roadmap</a>
-      </nav>
+  <!-- Futuristic Background -->
+  <div class="background"></div>
 
-      <div class="lang-switch">
-        <button id="langId">ID</button>
-        <button id="langEn">EN</button>
-      </div>
-
-      <!-- Farcaster button -->
-      <button class="btn outline" onclick="loginFarcaster()">Login Farcaster</button>
-      <div id="farcasterUser"></div>
-
-      <!-- Web3Modal button (connect wallet real) -->
-      <w3m-button balance="hide"></w3m-button>
+  <!-- Main Content -->
+  <header class="hero">
+    <img src="logo.png" alt="WAQIT Logo" class="logo" />
+    <h1 class="glow">WAQIT GAME PORTAL</h1>
+    <p class="subtitle">Play • Earn • Connect</p>
+    <div class="actions">
+      <a href="games/snake/snake.html" class="btn neon">🎮 Play Snake</a>
+      <button id="connectBtn" class="btn neon">🔗 Connect Wallet</button>
     </div>
   </header>
 
-  <main>
-    <!-- HERO (3D background) -->
-    <section class="hero">
-      <canvas id="heroCanvas" class="hero-canvas" aria-hidden="true"></canvas>
-      <div class="container hero-inner">
-        <div class="hero-text">
-          <h1 data-i18n="hero_title">Play Mini-Games. Earn On-Chain Rewards on Base.</h1>
-          <p data-i18n="hero_sub">Mobile-first. Claim tokens at milestones. Gas paid by player on claim.</p>
-          <div class="cta">
-            <a class="btn primary" href="#games" data-i18n="cta_play">Play Now</a>
-            <a class="btn ghost" href="#token" data-i18n="cta_token">View Tokenomics</a>
-          </div>
-        </div>
-        <div aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <!-- GAMES -->
-    <section id="games" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2 data-i18n="games_h2">Games</h2>
-          <p class="muted" data-i18n="games_sub">Pick your favorite. Claim after you hit targets.</p>
-        </div>
-        <div id="gameGrid" class="grid cards"></div>
-      </div>
-    </section>
-
-    <!-- HOW -->
-    <section id="how" class="section alt">
-      <div class="container">
-        <h2 data-i18n="how_h2">How it Works</h2>
-        <div class="grid steps">
-          <article class="step"><div class="step-num">1</div><h3 data-i18n="how_1_t">Connect Wallet</h3><p data-i18n="how_1_d">Coinbase Wallet / MetaMask / others.</p></article>
-          <article class="step"><div class="step-num">2</div><h3 data-i18n="how_2_t">Play a Game</h3><p data-i18n="how_2_d">Reach a milestone (e.g., score 10).</p></article>
-          <article class="step"><div class="step-num">3</div><h3 data-i18n="how_3_t">Claim on Base</h3><p data-i18n="how_3_d">Send a tx to the reward contract.</p></article>
-        </div>
-        <p class="note" data-i18n="note_gas">* Gas is paid by player on claim.</p>
-      </div>
-    </section>
-
-    <!-- TOKEN -->
-    <section id="token" class="section">
-      <div class="container">
-        <h2 data-i18n="token_h2">Token</h2>
-        <div class="token-stats">
-          <div class="stat"><div class="label" data-i18n="token_supply">Total Supply</div><div class="value">1,000,000,000</div></div>
-          <div class="stat"><div class="label" data-i18n="token_pool">Reward Pool</div><div class="value">40%</div></div>
-          <div class="stat"><div class="label" data-i18n="token_paid">Players Paid</div><div class="value" id="playersPaid">0</div></div>
-          <div class="stat"><div class="label" data-i18n="token_tx">Tx on Base</div><div class="value" id="txCount">0</div></div>
-        </div>
-        <div class="links">
-          <a class="btn outline" id="basescanLink" target="_blank" rel="noopener" data-i18n="token_view">View on BaseScan</a>
-          <a class="btn outline" href="#" data-i18n="token_read">Read Tokenomics</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ROADMAP -->
-    <section id="roadmap" class="section alt">
-      <div class="container">
-        <h2 data-i18n="roadmap_h2">Roadmap</h2>
-        <div class="timeline">
-          <div class="titem"><h3>MVP</h3><p data-i18n="roadmap_mvp">3 games live, on-chain claims.</p></div>
-          <div class="titem"><h3>Growth</h3><p data-i18n="roadmap_growth">10+ games, leaderboard, daily quests.</p></div>
-          <div class="titem"><h3>Scale</h3><p data-i18n="roadmap_scale">Tournaments, NFT badges, partners.</p></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container fwrap">
-      <p>© <span id="year"></span> WAQIT GAME PORTAL. <span data-i18n="footer_rights">All rights reserved.</span></p>
-      <nav class="foot-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></nav>
+  <!-- Tokenomics Section -->
+  <section class="tokenomics">
+    <h2>📊 Tokenomics</h2>
+    <div class="card">
+      <p><b>Total Supply:</b> 100,000,000,000 $WAQIT</p>
+      <p><b>Reward Pool:</b> 40%</p>
+      <p><b>Tx on Base:</b> 0</p>
     </div>
-  </footer>
+  </section>
 
-  <!-- Scripts -->
-  <script type="module" src="app.js"></script>
-
-  <!-- Web3Modal setup -->
-  <script type="module">
-    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
-    import { base } from 'https://unpkg.com/viem/chains@2?module';
-    import { WALLETCONNECT_PROJECT_ID } from './config.js';
-
-    const metadata = { 
-      name:'WAQIT GAME PORTAL',
-      description:'Mini-games on Base',
-      url:location.origin, 
-      icons:['https://avatars.githubusercontent.com/u/37784886?s=200&v=4'] 
-    };
-
-    const wagmiConfig = defaultWagmiConfig({ 
-      chains:[base], 
-      projectId: WALLETCONNECT_PROJECT_ID, 
-      metadata, 
-      enableCoinbase:true, 
-      enableInjected:true, 
-      enableWalletConnect:true, 
-      enableEIP6963:true 
-    });
-
-    createWeb3Modal({ 
-      wagmiConfig, 
-      projectId: WALLETCONNECT_PROJECT_ID, 
-      chains:[base], 
-      defaultChain: base, 
-      themeVariables:{'--w3m-accent':'#0052FF'} 
-    });
-  </script>
-
-  <!-- Farcaster SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@farcaster/auth-kit"></script>
-  <script type="module" src="./farcaster.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
