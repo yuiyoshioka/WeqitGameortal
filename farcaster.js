@@ -1,30 +1,34 @@
-import { AuthKit, FrameValidation } from "https://cdn.jsdelivr.net/npm/@farcaster/auth-kit/dist/browser/index.min.js";
+import { AuthKit } from "https://cdn.jsdelivr.net/npm/@farcaster/auth-kit/dist/browser/index.min.js";
 
-// init Farcaster AuthKit
+let farcasterUser = null;
+const userBox = document.getElementById("farcasterUser");
+
 const authKit = new AuthKit({
-  rpcUrl: "https://hub.farcaster.xyz:2281", // public hub RPC
-  relay: "https://relay.farcaster.xyz",    // relay official Farcaster
+  rpcUrl: "https://hub.farcaster.xyz:2281",
+  relay: "https://relay.farcaster.xyz",
   appName: "WAQIT GAME PORTAL"
 });
 
-// ambil tombol dan div user
-const userBox = document.getElementById("farcasterUser");
-
-// fungsi untuk login
 window.loginFarcaster = async () => {
   try {
     const res = await authKit.signIn();
-    console.log("Farcaster login success:", res);
-
     if (res && res.fid) {
+      farcasterUser = res;
       userBox.innerHTML = `
-        <div class="farc-user">
-          ✅ Logged in as <b>@${res.username || res.fid}</b>
-        </div>
+        <img src="${res.pfpUrl}" width="30" style="border-radius:50%;margin-right:6px"/>
+        <b>@${res.username || res.fid}</b>
       `;
     }
   } catch (err) {
     console.error("Farcaster login error:", err);
-    alert("Login Farcaster gagal, coba lagi.");
+    alert("Login Farcaster gagal.");
   }
 };
+
+// expose state biar bisa dicek app lain
+export function isFarcasterLoggedIn() {
+  return farcasterUser !== null;
+}
+export function getFarcasterUser() {
+  return farcasterUser;
+}
