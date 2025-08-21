@@ -1,97 +1,67 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WAQIT GAME PORTAL</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="hero">
-    <img src="logo.png" alt="WAQIT Game Portal" class="logo" />
-    <h1>WAQIT GAME PORTAL</h1>
-    <audio autoplay loop>
-      <source src="bgmusic.mp3" type="audio/mpeg" />
-    </audio>
+<script type="module">
+  import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from "./config.js";
+  import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
+  import { base } from "https://unpkg.com/viem/chains@2?module";
 
-    <div class="buttons">
-      <w3m-button id="walletBtn"></w3m-button>
-      <button id="loginFarcaster" class="btn">Login Farcaster</button>
-      <button id="playBtn" class="btn" style="display:none;">🎮 Main Game</button>
-    </div>
-  </div>
+  const btnWallet = document.getElementById("btnWallet");
+  const btnFarcaster = document.getElementById("btnFarcaster");
+  const btnPlay = document.getElementById("btnPlay");
 
-  <script type="module">
-    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
-    import { base } from 'https://unpkg.com/viem/chains@2?module';
-    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from './config.js';
+  let walletConnected = false;
+  let farcasterConnected = false;
 
-    let walletConnected = false;
-    let farcasterConnected = false;
-
-    // ============ WalletConnect Setup ============
-    const metadata = {
-      name: "WAQIT Game Portal",
-      description: "Snake game with on-chain rewards",
+  // === WALLET ===
+  const wagmiConfig = defaultWagmiConfig({
+    chains: [base],
+    projectId: WALLETCONNECT_PROJECT_ID,
+    metadata: {
+      name: "WAQIT GAME PORTAL",
+      description: "Portal Game Futuristik",
       url: location.origin,
-      icons: ["logo.png"]
-    };
-
-    const wagmiConfig = defaultWagmiConfig({
-      chains: [base],
-      projectId: WALLETCONNECT_PROJECT_ID,
-      metadata,
-      enableCoinbase: true,
-      enableInjected: true,
-      enableWalletConnect: true,
-      enableEIP6963: true
-    });
-
-    createWeb3Modal({
-      wagmiConfig,
-      projectId: WALLETCONNECT_PROJECT_ID,
-      chains: [base],
-      defaultChain: base
-    });
-
-    // Detect wallet connected
-    window.addEventListener("w3m:accountConnected", () => {
-      walletConnected = true;
-      checkAccess();
-    });
-
-    // ============ Farcaster Login ============
-    import NeynarClient from "https://cdn.jsdelivr.net/npm/@neynar/nodejs-sdk@latest/+esm";
-    const client = new NeynarClient(NEYNAR_API_KEY);
-
-    document.getElementById("loginFarcaster").addEventListener("click", async () => {
-      try {
-        const resp = await client.oauth.authorize({
-          redirectUri: window.location.origin,
-          scope: "openid f_name f_id"
-        });
-
-        if (resp?.user) {
-          farcasterConnected = true;
-          alert(`Login Farcaster sukses: ${resp.user.username}`);
-          checkAccess();
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Login Farcaster gagal.");
-      }
-    });
-
-    // ============ Enable Play Button ============
-    function checkAccess() {
-      if (walletConnected && farcasterConnected) {
-        document.getElementById("playBtn").style.display = "inline-block";
-      }
+      icons: ["/logo.png"]
     }
+  });
+  createWeb3Modal({
+    wagmiConfig,
+    projectId: WALLETCONNECT_PROJECT_ID,
+    chains: [base]
+  });
 
-    document.getElementById("playBtn").addEventListener("click", () => {
-      window.location.href = "/games/snake/index.html";
-    });
-  </script>
-</body>
-</html>
+  btnWallet.addEventListener("click", async () => {
+    // panggil modal wallet
+    walletConnected = true; // TODO: lo bisa cek state asli dari web3modal
+    btnWallet.innerText = "✅ Wallet Connected";
+    checkReady();
+  });
+
+  // === FARCASTER ===
+  btnFarcaster.addEventListener("click", async () => {
+    try {
+      const res = await fetch("https://api.neynar.com/v2/farcaster/user", {
+        headers: { "api_key": NEYNAR_API_KEY }
+      });
+      if (res.ok) {
+        farcasterConnected = true;
+        btnFarcaster.innerText = "✅ Farcaster Connected";
+        checkReady();
+      } else {
+        alert("Login Farcaster gagal");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error login Farcaster");
+    }
+  });
+
+  // === CEK KEDUANYA ===
+  function checkReady() {
+    if (walletConnected && farcasterConnected) {
+      btnPlay.disabled = false;
+    }
+  }
+
+  // === MAIN GAME ===
+  btnPlay.addEventListener("click", () => {
+    window.location.href = "/games/snake/index.html";
+  });
+</script>
