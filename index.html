@@ -1,50 +1,42 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WAQIT GAME PORTAL</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="topbar">
-    <img src="logo.png" alt="WAQIT GAME PORTAL" class="logo">
+  <div class="hero">
+    <img src="logo.png" alt="WAQIT Game Portal" class="logo" />
     <h1>WAQIT GAME PORTAL</h1>
-    <audio id="bgm" autoplay loop>
-      <source src="bgm.mp3" type="audio/mpeg">
+    <audio autoplay loop>
+      <source src="bgmusic.mp3" type="audio/mpeg" />
     </audio>
-    <button id="muteBtn">🔊</button>
-    <w3m-button></w3m-button>
-  </header>
 
-  <!-- MAIN -->
-  <main class="center">
-    <h2>Portal Game Futuristik</h2>
-    <p>Login dulu dengan Wallet + Farcaster untuk mulai main.</p>
+    <div class="buttons">
+      <w3m-button id="walletBtn"></w3m-button>
+      <button id="loginFarcaster" class="btn">Login Farcaster</button>
+      <button id="playBtn" class="btn" style="display:none;">🎮 Main Game</button>
+    </div>
+  </div>
 
-    <button id="loginFarcaster" class="btn">🔑 Login Farcaster</button>
-
-    <button id="playBtn" class="btn" style="display:none;"
-      onclick="window.location.href='/games/snake/index.html'">
-      🎮 Main Game
-    </button>
-  </main>
-
-  <!-- SCRIPT -->
   <script type="module">
-    import { createWeb3Modal, defaultWagmiConfig } from "https://unpkg.com/@web3modal/wagmi@3?module";
-    import { base } from "https://unpkg.com/viem/chains@2?module";
-    import NeynarClient from "https://cdn.jsdelivr.net/npm/@neynar/nodejs-sdk@latest/+esm";
-    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from "./config.js";
+    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
+    import { base } from 'https://unpkg.com/viem/chains@2?module';
+    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from './config.js';
 
-    // ==== Wallet ====
+    let walletConnected = false;
+    let farcasterConnected = false;
+
+    // ============ WalletConnect Setup ============
     const metadata = {
-      name: "WAQIT GAME PORTAL",
-      description: "Play Web3 games with rewards",
+      name: "WAQIT Game Portal",
+      description: "Snake game with on-chain rewards",
       url: location.origin,
       icons: ["logo.png"]
     };
+
     const wagmiConfig = defaultWagmiConfig({
       chains: [base],
       projectId: WALLETCONNECT_PROJECT_ID,
@@ -54,17 +46,23 @@
       enableWalletConnect: true,
       enableEIP6963: true
     });
-    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base] });
 
-    let walletConnected = false;
-    window.ethereum?.on("accountsChanged", accs => {
-      walletConnected = accs && accs.length > 0;
-      checkReady();
+    createWeb3Modal({
+      wagmiConfig,
+      projectId: WALLETCONNECT_PROJECT_ID,
+      chains: [base],
+      defaultChain: base
     });
 
-    // ==== Farcaster ====
+    // Detect wallet connected
+    window.addEventListener("w3m:accountConnected", () => {
+      walletConnected = true;
+      checkAccess();
+    });
+
+    // ============ Farcaster Login ============
+    import NeynarClient from "https://cdn.jsdelivr.net/npm/@neynar/nodejs-sdk@latest/+esm";
     const client = new NeynarClient(NEYNAR_API_KEY);
-    let farcasterLoggedIn = false;
 
     document.getElementById("loginFarcaster").addEventListener("click", async () => {
       try {
@@ -72,10 +70,11 @@
           redirectUri: window.location.origin,
           scope: "openid f_name f_id"
         });
+
         if (resp?.user) {
+          farcasterConnected = true;
           alert(`Login Farcaster sukses: ${resp.user.username}`);
-          farcasterLoggedIn = true;
-          checkReady();
+          checkAccess();
         }
       } catch (err) {
         console.error(err);
@@ -83,19 +82,15 @@
       }
     });
 
-    // ==== Show play if both ok ====
-    function checkReady() {
-      if (walletConnected && farcasterLoggedIn) {
+    // ============ Enable Play Button ============
+    function checkAccess() {
+      if (walletConnected && farcasterConnected) {
         document.getElementById("playBtn").style.display = "inline-block";
       }
     }
 
-    // ==== Music mute/unmute ====
-    const bgm = document.getElementById("bgm");
-    const muteBtn = document.getElementById("muteBtn");
-    muteBtn.addEventListener("click", () => {
-      bgm.muted = !bgm.muted;
-      muteBtn.textContent = bgm.muted ? "🔇" : "🔊";
+    document.getElementById("playBtn").addEventListener("click", () => {
+      window.location.href = "/games/snake/index.html";
     });
   </script>
 </body>
