@@ -1,87 +1,22 @@
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WAQIT GAME PORTAL</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <img src="/logo.png" alt="Logo WAQIT" class="logo" />
+  <div class="container">
+    <img src="logo.png" alt="WAQIT Logo" class="logo" />
     <h1>WAQIT GAME PORTAL</h1>
-  </header>
+    <p>Play. Earn. Connect. 🚀</p>
 
-  <main>
     <button id="btnWallet">🔗 Connect Wallet</button>
-    <button id="btnFarcaster">🌀 Login Farcaster</button>
-    <button id="btnPlay" disabled>▶ Main Game</button>
-  </main>
+    <button id="btnFarcaster">💬 Login Farcaster</button>
+    <button id="btnPlay" disabled>🎮 Main Sekarang</button>
+  </div>
 
-  <audio autoplay loop>
-    <source src="/bg-music.mp3" type="audio/mpeg">
-  </audio>
-
-  <script type="module">
-    import { WALLETCONNECT_PROJECT_ID, NEYNAR_API_KEY } from "./config.js";
-    import { createWeb3Modal, defaultWagmiConfig } 
-      from "https://unpkg.com/@web3modal/wagmi@3?module";
-    import { base } from "https://unpkg.com/viem/chains@2?module";
-
-    const btnWallet = document.getElementById("btnWallet");
-    const btnFarcaster = document.getElementById("btnFarcaster");
-    const btnPlay = document.getElementById("btnPlay");
-
-    let walletConnected = false;
-    let farcasterConnected = false;
-
-    // === Wallet ===
-    const wagmiConfig = defaultWagmiConfig({
-      chains: [base],
-      projectId: WALLETCONNECT_PROJECT_ID,
-      metadata: {
-        name: "WAQIT GAME PORTAL",
-        description: "Portal Game Futuristik",
-        url: location.origin,
-        icons: ["/logo.png"]
-      }
-    });
-    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base] });
-
-    btnWallet.addEventListener("click", () => {
-      walletConnected = true; 
-      btnWallet.innerText = "✅ Wallet Connected";
-      checkReady();
-    });
-
-    // === Farcaster ===
-    btnFarcaster.addEventListener("click", async () => {
-      try {
-        const res = await fetch("https://api.neynar.com/v2/farcaster/user", {
-          headers: { "api_key": NEYNAR_API_KEY }
-        });
-        if (res.ok) {
-          farcasterConnected = true;
-          btnFarcaster.innerText = "✅ Farcaster Connected";
-          checkReady();
-        } else {
-          alert("Login Farcaster gagal");
-        }
-      } catch (e) {
-        alert("Error login Farcaster");
-        console.error(e);
-      }
-    });
-
-    function checkReady() {
-      if (walletConnected && farcasterConnected) {
-        btnPlay.disabled = false;
-      }
-    }
-
-    btnPlay.addEventListener("click", () => {
-      window.location.href = "/games/snake/index.html";
-    });
-  </script>
+  <script type="module" src="./script.js"></script>
 </body>
 </html>
