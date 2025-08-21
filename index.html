@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PlayBase — Portal Game</title>
+  <title>WAQIT GAME PORTAL</title>
   <meta name="description" content="Mainkan mini-game & klaim reward on-chain di Base." />
   <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <body>
   <header class="header">
     <div class="container nav">
-      <a class="brand" href="#"><span class="logo">◆</span><span>PlayBase</span></a>
+      <a class="brand" href="#"><span class="logo">◆</span><span>WAQIT GAME PORTAL</span></a>
 
       <button class="nav-toggle" aria-expanded="false">☰</button>
       <nav class="nav-links" id="nav">
@@ -28,6 +28,10 @@
         <button id="langEn">EN</button>
       </div>
 
+      <!-- Farcaster button -->
+      <button class="btn outline" onclick="loginFarcaster()">Login Farcaster</button>
+      <div id="farcasterUser"></div>
+
       <!-- Web3Modal button (connect wallet real) -->
       <w3m-button balance="hide"></w3m-button>
     </div>
@@ -39,8 +43,8 @@
       <canvas id="heroCanvas" class="hero-canvas" aria-hidden="true"></canvas>
       <div class="container hero-inner">
         <div class="hero-text">
-          <h1 data-i18n="hero_title">Play Mini‑Games. Earn On‑Chain Rewards on Base.</h1>
-          <p data-i18n="hero_sub">Mobile‑first. Claim tokens at milestones. Gas paid by player on claim.</p>
+          <h1 data-i18n="hero_title">Play Mini-Games. Earn On-Chain Rewards on Base.</h1>
+          <p data-i18n="hero_sub">Mobile-first. Claim tokens at milestones. Gas paid by player on claim.</p>
           <div class="cta">
             <a class="btn primary" href="#games" data-i18n="cta_play">Play Now</a>
             <a class="btn ghost" href="#token" data-i18n="cta_token">View Tokenomics</a>
@@ -96,7 +100,7 @@
       <div class="container">
         <h2 data-i18n="roadmap_h2">Roadmap</h2>
         <div class="timeline">
-          <div class="titem"><h3>MVP</h3><p data-i18n="roadmap_mvp">3 games live, on‑chain claims.</p></div>
+          <div class="titem"><h3>MVP</h3><p data-i18n="roadmap_mvp">3 games live, on-chain claims.</p></div>
           <div class="titem"><h3>Growth</h3><p data-i18n="roadmap_growth">10+ games, leaderboard, daily quests.</p></div>
           <div class="titem"><h3>Scale</h3><p data-i18n="roadmap_scale">Tournaments, NFT badges, partners.</p></div>
         </div>
@@ -106,20 +110,48 @@
 
   <footer class="footer">
     <div class="container fwrap">
-      <p>© <span id="year"></span> PlayBase. <span data-i18n="footer_rights">All rights reserved.</span></p>
+      <p>© <span id="year"></span> WAQIT GAME PORTAL. <span data-i18n="footer_rights">All rights reserved.</span></p>
       <nav class="foot-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></nav>
     </div>
   </footer>
 
   <!-- Scripts -->
   <script type="module" src="app.js"></script>
+
+  <!-- Web3Modal setup -->
   <script type="module">
     import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
     import { base } from 'https://unpkg.com/viem/chains@2?module';
     import { WALLETCONNECT_PROJECT_ID } from './config.js';
-    const metadata = { name:'PlayBase', description:'Mini‑games on Base', url:location.origin, icons:['https://avatars.githubusercontent.com/u/37784886?s=200&v=4'] };
-    const wagmiConfig = defaultWagmiConfig({ chains:[base], projectId: WALLETCONNECT_PROJECT_ID, metadata, enableCoinbase:true, enableInjected:true, enableWalletConnect:true, enableEIP6963:true });
-    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base], defaultChain: base, themeVariables:{'--w3m-accent':'#0052FF'} });
+
+    const metadata = { 
+      name:'WAQIT GAME PORTAL',
+      description:'Mini-games on Base',
+      url:location.origin, 
+      icons:['https://avatars.githubusercontent.com/u/37784886?s=200&v=4'] 
+    };
+
+    const wagmiConfig = defaultWagmiConfig({ 
+      chains:[base], 
+      projectId: WALLETCONNECT_PROJECT_ID, 
+      metadata, 
+      enableCoinbase:true, 
+      enableInjected:true, 
+      enableWalletConnect:true, 
+      enableEIP6963:true 
+    });
+
+    createWeb3Modal({ 
+      wagmiConfig, 
+      projectId: WALLETCONNECT_PROJECT_ID, 
+      chains:[base], 
+      defaultChain: base, 
+      themeVariables:{'--w3m-accent':'#0052FF'} 
+    });
   </script>
+
+  <!-- Farcaster SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@farcaster/auth-kit"></script>
+  <script type="module" src="./farcaster.js"></script>
 </body>
 </html>
