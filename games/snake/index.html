@@ -1,37 +1,279 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Snake — PlayBase</title>
-  <link rel="stylesheet" href="snake.css" />
-</head>
-<body>
-  <header class="topbar">
-    <a href="../../index.html" class="back" data-i18n="back">Kembali</a>
-    <div class="title">🐍 Snake</div>
-    <w3m-button balance="hide"></w3m-button>
-  </header>
+// games/snake/snake.js
 
-  <main class="wrap">
-    <div class="hud">
-      <div><span data-i18n="score">Skor</span>: <span id="score">0</span></div>
-      <button id="claimBtn" class="btn" disabled data-i18n="claim">Klaim Reward</button>
-    </div>
-    <canvas id="canvas" width="400" height="400"></canvas>
-    <p class="hint" data-i18n="controls_hint">Kontrol: swipe atau tombol panah</p>
-  </main>
+import { initI18n } from '../../i18n.js';
+initI18n(document);
 
-  <script type="module">
-    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
-    import { base } from 'https://unpkg.com/viem/chains@2?module';
-    import { initI18n } from '../../i18n.js';
-    import { WALLETCONNECT_PROJECT_ID } from '../../config.js';
-    initI18n(document);
-    const metadata = { name:'PlayBase Snake', description:'Snake with on‑chain rewards', url: location.origin, icons: ['https://avatars.githubusercontent.com/u/37784886?s=200&v=4'] };
-    const wagmiConfig = defaultWagmiConfig({ chains:[base], projectId: WALLETCONNECT_PROJECT_ID, metadata, enableCoinbase:true, enableInjected:true, enableWalletConnect:true, enableEIP6963:true });
-    createWeb3Modal({ wagmiConfig, projectId: WALLETCONNECT_PROJECT_ID, chains:[base], defaultChain: base });
-  </script>
-  <script type="module" src="snake.js"></script>
-</body>
-</html>
+// ====== Konfigurasi ======
+const CELL_SIZE = 20;             // px per sel
+const BOARD_CELLS = 20;           // 20x20
+const TICK_MS = 120;              // kecepatan snake
+const BONUS_INTERVAL_MS = 60_000; // bonus muncul setiap 1 menit
+const BONUS_LIFETIME_MS = 3_000;  // bonus hilang setelah 3 detik
+const DAILY_LIMIT = 10;           // maksimal main per hari per user
+const OBSTACLES = [               // rintangan tetap
+  { x: 5, y: 5 },
+  { x: 14, y: 10 },
+  { x: 10, y: 15 }
+];
+
+// ====== Elemen DOM ======
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const claimBtn = document.getElementById('claimBtn');
+
+// ====== State Game ======
+let snake, dir, nextDir, food, bonusFood, alive, score, tokens;
+let loopTimer = null, bonusTimer = null, bonusTimeout = null;
+let touchStart = null;
+
+// ====== Util ======
+function randCell() {
+  return { x: Math.floor(Math.random() * BOARD_CELLS), y: Math.floor(Math.random() * BOARD_CELLS) };
+}
+
+function wrap(n) {
+  if (n < 0) return BOARD_CELLS - 1;
+  if (n >= BOARD_CELLS) return 0;
+  return n;
+}
+
+function nowDateKey() {
+  const d = new Date();
+  return d.toISOString().slice(0,10); // YYYY-MM-DD
+}
+
+async function getUserId() {
+  try {
+    if (window.ethereum) {
+      const accs = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accs && accs[0]) return accs[0].toLowerCase();
+    }
+  } catch {}
+  return 'guest';
+}
+
+async function getPlaysToday() {
+  const uid = await getUserId();
+  const key = `snake_plays_${uid}_${nowDateKey()}`;
+  return parseInt(localStorage.getItem(key) || '0', 10);
+}
+
+async function incPlaysToday() {
+  const uid = await getUserId();
+  const key = `snake_plays_${uid}_${nowDateKey()}`;
+  const v = (parseInt(localStorage.getItem(key) || '0', 10) + 1);
+  localStorage.setItem(key, String(v));
+  return v;
+}
+
+// ====== Init & Start ======
+async function canPlayToday() {
+  const plays = await getPlaysToday();
+  return plays < DAILY_LIMIT;
+}
+
+async function startGame() {
+  const allowed = await canPlayToday();
+  if (!allowed) {
+    alert(`Limit main harian habis (max ${DAILY_LIMIT} kali). Coba lagi besok ya!`);
+    claimBtn.disabled = true;
+    return;
+  }
+
+  await incPlaysToday();
+
+  snake = [{ x: 10, y: 10 }];
+  dir = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  food = spawnFood();
+  bonusFood = null;
+  alive = true;
+  score = 0;
+  tokens = 0;
+  scoreEl.textContent = '0';
+  claimBtn.disabled = true;
+
+  clearInterval(loopTimer);
+  loopTimer = setInterval(tick, TICK_MS);
+
+  clearInterval(bonusTimer);
+  bonusTimer = setInterval(() => {
+    if (!bonusFood) {
+      bonusFood = spawnBonusFood();
+      if (bonusTimeout) clearTimeout(bonusTimeout);
+      bonusTimeout = setTimeout(() => { bonusFood = null; draw(); }, BONUS_LIFETIME_MS);
+    }
+  }, BONUS_INTERVAL_MS);
+}
+
+function spawnFood() {
+  let f = randCell();
+  while (snake.some(s => s.x === f.x && s.y === f.y) || isObstacle(f)) f = randCell();
+  return f;
+}
+
+function spawnBonusFood() {
+  let b = randCell();
+  while (
+    snake.some(s => s.x === b.x && s.y === b.y) ||
+    (food && b.x === food.x && b.y === food.y) ||
+    isObstacle(b)
+  ) b = randCell();
+  return b;
+}
+
+function isObstacle(cell) {
+  return OBSTACLES.some(o => o.x === cell.x && o.y === cell.y);
+}
+
+// ====== Game Loop ======
+function tick() {
+  if (!alive) return;
+
+  if ((nextDir.x !== -dir.x) || (nextDir.y !== -dir.y)) dir = nextDir;
+
+  const head = { x: wrap(snake[0].x + dir.x), y: wrap(snake[0].y + dir.y) };
+
+  // tabrak badan sendiri
+  if (snake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
+    alive = false; draw(true); return;
+  }
+
+  // tabrak rintangan
+  if (isObstacle(head)) {
+    alive = false; draw(true); return;
+  }
+
+  snake.unshift(head);
+
+  if (bonusFood && head.x === bonusFood.x && head.y === bonusFood.y) {
+    tokens += 5;
+    bonusFood = null;
+    if (bonusTimeout) clearTimeout(bonusTimeout);
+    score += 1;
+    scoreEl.textContent = score;
+    claimBtn.disabled = tokens <= 0;
+  } else if (head.x === food.x && head.y === food.y) {
+    tokens += 1;
+    food = spawnFood();
+    score += 1;
+    scoreEl.textContent = score;
+    claimBtn.disabled = tokens <= 0;
+  } else {
+    snake.pop();
+  }
+
+  draw();
+}
+
+// ====== Input ======
+document.addEventListener('keydown', (e) => {
+  if (!alive && (e.key === 'Enter' || e.key === ' ')) { startGame(); return; }
+  if (e.key === 'ArrowUp' && dir.y !== 1) nextDir = { x: 0, y: -1 };
+  if (e.key === 'ArrowDown' && dir.y !== -1) nextDir = { x: 0, y: 1 };
+  if (e.key === 'ArrowLeft' && dir.x !== 1) nextDir = { x: -1, y: 0 };
+  if (e.key === 'ArrowRight' && dir.x !== -1) nextDir = { x: 1, y: 0 };
+});
+
+canvas.addEventListener('touchstart', (e) => { touchStart = e.changedTouches[0]; }, { passive: true });
+canvas.addEventListener('touchend', (e) => {
+  if (!touchStart) return;
+  const dx = e.changedTouches[0].clientX - touchStart.clientX;
+  const dy = e.changedTouches[0].clientY - touchStart.clientY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 0 && dir.x !== -1) nextDir = { x: 1, y: 0 };
+    else if (dx < 0 && dir.x !== 1) nextDir = { x: -1, y: 0 };
+  } else {
+    if (dy > 0 && dir.y !== -1) nextDir = { x: 0, y: 1 };
+    else if (dy < 0 && dir.y !== 1) nextDir = { x: 0, y: -1 };
+  }
+  touchStart = null;
+}, { passive: true });
+
+canvas.addEventListener('click', async () => {
+  if (!alive && await canPlayToday()) startGame();
+});
+
+// ====== Render ======
+function draw(gameOver = false) {
+  ctx.fillStyle = '#0d1226';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  for (let i = 1; i < BOARD_CELLS; i++) {
+    ctx.beginPath(); ctx.moveTo(i * CELL_SIZE, 0); ctx.lineTo(i * CELL_SIZE, canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, i * CELL_SIZE); ctx.lineTo(canvas.width, i * CELL_SIZE); ctx.stroke();
+  }
+
+  // obstacles
+  OBSTACLES.forEach(o => {
+    ctx.fillStyle = '#6c63ff';
+    ctx.fillRect(o.x * CELL_SIZE, o.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  });
+
+  // food
+  if (food) {
+    ctx.fillStyle = '#ff4d4f';
+    ctx.fillRect(food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  }
+
+  // bonus food
+  if (bonusFood) {
+    const x = bonusFood.x * CELL_SIZE, y = bonusFood.y * CELL_SIZE;
+    ctx.fillStyle = '#ffd54f';
+    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+    ctx.strokeStyle = 'rgba(255,213,79,0.7)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+  }
+
+  // snake
+  snake.forEach((p, i) => {
+    ctx.fillStyle = i === 0 ? '#00e5a8' : '#1de9b6';
+    ctx.fillRect(p.x * CELL_SIZE, p.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  });
+
+  // HUD
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(0, 0, 120, 26);
+  ctx.fillStyle = '#E8F0FF';
+  ctx.font = 'bold 14px Inter, sans-serif';
+  ctx.fillText(`Tokens: ${tokens}`, 8, 18);
+
+  if (gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.fillText('Game Over', 130, 185);
+    ctx.font = '16px Inter, sans-serif';
+    ctx.fillText('Klik / Enter untuk main lagi', 100, 215);
+  }
+}
+
+// ====== Claim ======
+claimBtn.addEventListener('click', async () => {
+  if (tokens <= 0) return;
+  if (!window.claimReward) {
+    alert('claim.js belum dimuat. Pastikan <script type="module" src="../../claim.js"></script> ada.');
+    return;
+  }
+  claimBtn.disabled = true;
+  try {
+    await window.claimReward(tokens);
+    alert(`Berhasil klaim ${tokens} token!`);
+    tokens = 0;
+  } catch (err) {
+    console.error(err);
+    alert('Klaim gagal. Coba lagi.');
+  } finally {
+    claimBtn.disabled = tokens <= 0;
+    draw();
+  }
+});
+
+// ====== Mulai ======
+startGame();
+draw();
