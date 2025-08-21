@@ -1,90 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
+  margin: 0;
   font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(circle at top, #0f0f2d, #000);
   color: #fff;
-  background: #0a0f1c;
-  overflow-x: hidden;
   text-align: center;
 }
 
-/* Futuristic Background Animation */
-.background {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle, #1a1f35, #0a0f1c);
-  z-index: -1;
-  animation: pulse 8s infinite alternate;
-}
-@keyframes pulse {
-  from { background: radial-gradient(circle, #1a1f35, #0a0f1c); }
-  to { background: radial-gradient(circle, #2a2f55, #0a0f1c); }
+.hero {
+  padding: 50px 20px;
+  animation: fadeIn 2s ease-in-out;
 }
 
-/* Logo & Hero */
-.hero { margin-top: 10vh; }
 .logo {
-  width: 180px;
-  filter: drop-shadow(0 0 25px #00ffe7);
-}
-.glow {
-  font-size: 2.5em;
-  color: #00ffe7;
-  text-shadow: 0 0 20px #00ffe7, 0 0 40px #00e0ff;
-}
-.subtitle {
-  font-size: 1.2em;
-  margin-top: 10px;
-  opacity: 0.8;
+  width: 120px;
+  margin-bottom: 20px;
 }
 
-/* Buttons */
-.btn {
-  display: inline-block;
-  margin: 20px;
-  padding: 15px 30px;
+h1 {
+  font-size: 2.5rem;
+  color: #00e5ff;
+  text-shadow: 0 0 15px #00e5ff;
+}
+
+button {
+  background: #00e5ff;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1em;
+  padding: 12px 20px;
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
+  border-radius: 8px;
   transition: 0.3s;
 }
-.neon {
-  background: transparent;
-  color: #00ffe7;
-  border: 2px solid #00ffe7;
-  box-shadow: 0 0 10px #00ffe7, 0 0 20px #00e0ff;
-}
-.neon:hover {
-  background: #00ffe7;
-  color: #0a0f1c;
+
+button:hover {
+  background: #00bcd4;
 }
 
-/* Tokenomics */
-.tokenomics {
-  margin: 50px auto;
+#gameArea {
+  margin: 20px auto;
   max-width: 500px;
 }
-.card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid #00ffe7;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 0 15px #00ffe7;
-}
 
-/* Music Button */
-#muteBtn {
-  position: fixed;
-  top: 20px; right: 20px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid #00ffe7;
-  color: #00ffe7;
-  font-size: 20px;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
+canvas {
+  background: #0d1226;
+  border: 2px solid #00e5ff;
 }
