@@ -1,42 +1,59 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WAQIT Game Portal</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WAQIT GAME PORTAL</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Background Music -->
-  <audio id="bgm" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg" />
+  <audio id="bg-music" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
   </audio>
-  <button id="muteBtn">🔊</button>
 
-  <!-- Futuristic Background -->
-  <div class="background"></div>
+  <!-- Hero Section -->
+  <div class="hero">
+    <img src="logo.png" alt="WAQIT Logo" class="logo">
+    <h1>WAQIT GAME PORTAL</h1>
+    <p>Play to Earn • Blockchain Gaming</p>
 
-  <!-- Main Content -->
-  <header class="hero">
-    <img src="logo.png" alt="WAQIT Logo" class="logo" />
-    <h1 class="glow">WAQIT GAME PORTAL</h1>
-    <p class="subtitle">Play • Earn • Connect</p>
-    <div class="actions">
-      <a href="games/snake/snake.html" class="btn neon">🎮 Play Snake</a>
-      <button id="connectBtn" class="btn neon">🔗 Connect Wallet</button>
-    </div>
-  </header>
+    <!-- Wallet Connect -->
+    <w3m-button></w3m-button>
 
-  <!-- Tokenomics Section -->
-  <section class="tokenomics">
-    <h2>📊 Tokenomics</h2>
-    <div class="card">
-      <p><b>Total Supply:</b> 100,000,000,000 $WAQIT</p>
-      <p><b>Reward Pool:</b> 40%</p>
-      <p><b>Tx on Base:</b> 0</p>
-    </div>
-  </section>
+    <!-- Button to Games -->
+    <a href="games/snake/index.html" class="btn">🎮 Mulai Main</a>
+  </div>
 
-  <script src="script.js"></script>
+  <!-- Web3Modal WalletConnect -->
+  <script type="module">
+    import { createWeb3Modal, defaultWagmiConfig } from 'https://unpkg.com/@web3modal/wagmi@3?module';
+    import { base } from 'https://unpkg.com/viem/chains@2?module';
+    import { WALLETCONNECT_PROJECT_ID } from './config.js';
+
+    const metadata = {
+      name: 'WAQIT GAME PORTAL',
+      description: 'Portal Play to Earn Blockchain Gaming',
+      url: location.origin,
+      icons: ['logo.png']
+    };
+
+    const wagmiConfig = defaultWagmiConfig({
+      chains: [base],
+      projectId: WALLETCONNECT_PROJECT_ID,
+      metadata,
+      enableCoinbase: true,
+      enableInjected: true,
+      enableWalletConnect: true,
+      enableEIP6963: true
+    });
+
+    createWeb3Modal({
+      wagmiConfig,
+      projectId: WALLETCONNECT_PROJECT_ID,
+      chains: [base],
+      defaultChain: base
+    });
+  </script>
 </body>
 </html>
